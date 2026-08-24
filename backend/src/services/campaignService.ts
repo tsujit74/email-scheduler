@@ -4,6 +4,7 @@ import {
   findCampaignById,
   findCampaignsByUserId,
 } from "../repositories/campaignRepository";
+import { AppError } from "../utils/AppError";
 
 type CreateCampaignInput = {
   subject: string;
@@ -66,17 +67,23 @@ export async function cancelCampaignForUser(
 ) {
   const campaign = await findCampaignById(campaignId);
 
-  if (!campaign || campaign.userId !== userId) {
-    throw new Error("Campaign not found");
-  }
+ if (!campaign || campaign.userId !== userId) {
+  throw new AppError("Campaign not found", 404);
+}
 
-  if (campaign.status === "completed") {
-    throw new Error("Completed campaign cannot be cancelled");
-  }
+if (campaign.status === "completed") {
+  throw new AppError(
+    "Completed campaign cannot be cancelled",
+    409,
+  );
+}
 
-  if (campaign.status === "cancelled") {
-    throw new Error("Campaign is already cancelled");
-  }
+if (campaign.status === "cancelled") {
+  throw new AppError(
+    "Campaign is already cancelled",
+    409,
+  );
+}
 
   return cancelCampaign(campaignId);
 }

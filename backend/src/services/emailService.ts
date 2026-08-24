@@ -6,6 +6,7 @@ import {
 } from "../repositories/emailRepository";
 import { queueEmail } from "./emailQueueService";
 import { calculateScheduledAt } from "../utils/emailScheduling";
+import { AppError } from "../utils/AppError";
 
 type CreateEmailsInput = {
   recipients: string[];
@@ -63,7 +64,7 @@ export async function getCampaignEmails(userId: string, campaignId: string) {
   const campaign = await findCampaignById(campaignId);
 
   if (!campaign || campaign.userId !== userId) {
-    throw new Error("Campaign not found");
+    throw new AppError("Campaign not found", 404);
   }
 
   return findEmailsByCampaignId(campaignId);
