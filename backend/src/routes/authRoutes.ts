@@ -31,10 +31,7 @@ router.get(
     failureRedirect: "/api/auth/login-failed",
   }),
   (_req, res) => {
-    res.json({
-      success: true,
-      message: "Google authentication successful",
-    });
+    res.redirect("http://localhost:3000/dashboard");
   },
 );
 
