@@ -1,6 +1,7 @@
 import { emailWorker } from "./services/emailWorker";
 import { verifyEmailTransport } from "./services/emailSender";
 
+
 async function startWorker() {
   try {
     await verifyEmailTransport();
