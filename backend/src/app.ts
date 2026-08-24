@@ -10,6 +10,7 @@ import authRoutes from "./routes/authRoutes";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
 import campaignRoutes from "./routes/campaignRoutes";
+import emailRoutes from "./routes/emailRoutes";
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/campaigns", campaignRoutes);
+app.use("/api", emailRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
