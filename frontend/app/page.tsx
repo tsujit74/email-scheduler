@@ -1,7 +1,28 @@
-export default function Home() {
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/lib/api";
+
+export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        await getCurrentUser();
+        router.replace("/dashboard");
+      } catch {
+        router.replace("/login");
+      }
+    }
+
+    checkAuth();
+  }, [router]);
+
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
-  )
+    <main className="flex min-h-screen items-center justify-center bg-white">
+      <p className="text-sm text-gray-500">Loading...</p>
+    </main>
+  );
 }
