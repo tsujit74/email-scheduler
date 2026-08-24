@@ -5,6 +5,7 @@ import {
   findEmailsByCampaignId,
 } from "../repositories/emailRepository";
 import { queueEmail } from "./emailQueueService";
+import { calculateScheduledAt } from "../utils/emailScheduling";
 
 type CreateEmailsInput = {
   recipients: string[];
@@ -36,35 +37,29 @@ export async function addEmailsToCampaign(
     recipient,
     subject: campaign.subject,
     body: campaign.body,
-    scheduledAt: new Date(
-      campaign.startTime.getTime() +
-        index * campaign.delayBetweenEmails,
+    scheduledAt: calculateScheduledAt(
+      campaign.startTime,
+      index,
+      campaign.delayBetweenEmails,
+      campaign.hourlyLimit,
     ),
     idempotencyKey: randomUUID(),
   }));
 
- const createdEmails = [];
+  const createdEmails = [];
 
-for (const email of emails) {
-  const createdEmail = await createEmail(email);
+  for (const email of emails) {
+    const createdEmail = await createEmail(email);
 
-  createdEmails.push(createdEmail);
+    createdEmails.push(createdEmail);
 
-  await queueEmail(
-    createdEmail.id,
-    createdEmail.scheduledAt,
-  );
+    await queueEmail(createdEmail.id, createdEmail.scheduledAt);
+  }
+
+  return createdEmails;
 }
 
-return createdEmails;
-
-
-}
-
-export async function getCampaignEmails(
-  userId: string,
-  campaignId: string,
-) {
+export async function getCampaignEmails(userId: string, campaignId: string) {
   const campaign = await findCampaignById(campaignId);
 
   if (!campaign || campaign.userId !== userId) {
