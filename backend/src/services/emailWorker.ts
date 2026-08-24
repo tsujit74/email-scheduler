@@ -96,9 +96,7 @@ export const emailWorker = new Worker(
         error instanceof Error ? error.message : "Unknown email error";
 
       const maxAttempts = job.opts.attempts ?? 1;
-
       const currentAttempt = job.attemptsMade + 1;
-
       const isFinalAttempt = currentAttempt >= maxAttempts;
 
       await prisma.email.update({
@@ -121,6 +119,14 @@ export const emailWorker = new Worker(
         console.error(
           `Email ${email.id} permanently failed after ${maxAttempts} attempts`,
         );
+
+        const pendingEmails = await countPendingEmails(email.campaignId);
+
+        if (pendingEmails === 0) {
+          await updateCampaignStatus(email.campaignId, "completed");
+        } else {
+          await updateCampaignStatus(email.campaignId, "processing");
+        }
       }
 
       throw error;
