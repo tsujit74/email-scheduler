@@ -1,7 +1,19 @@
 import { emailWorker } from "./services/emailWorker";
+import { verifyEmailTransport } from "./services/emailSender";
 
-console.log("Email worker started");
+async function startWorker() {
+  try {
+    await verifyEmailTransport();
 
-emailWorker.on("ready", () => {
-  console.log("Worker connected to Redis");
-});
+    console.log("Email worker started");
+
+    emailWorker.on("ready", () => {
+      console.log("Worker connected to Redis");
+    });
+  } catch (error) {
+    console.error("SMTP verification failed:", error);
+    process.exit(1);
+  }
+}
+
+startWorker();

@@ -28,7 +28,11 @@ const envSchema = z.object({
     .string()
     .min(32, "SESSION_SECRET must be at least 32 characters"),
 
-    
+    SMTP_HOST: z.string().min(1, "SMTP_HOST is required"),
+SMTP_PORT: z.coerce.number().int().positive().default(587),
+SMTP_USER: z.string().min(1, "SMTP_USER is required"),
+SMTP_PASSWORD: z.string().min(1, "SMTP_PASSWORD is required"),
+SMTP_FROM: z.string().email("SMTP_FROM must be a valid email address"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

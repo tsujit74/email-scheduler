@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { findCampaignById } from "../repositories/campaignRepository";
 import {
-  createManyEmails,
+  createEmail,
   findEmailsByCampaignId,
 } from "../repositories/emailRepository";
 import { queueEmail } from "./emailQueueService";
@@ -37,23 +37,34 @@ export async function addEmailsToCampaign(
     subject: campaign.subject,
     body: campaign.body,
     scheduledAt: new Date(
-      campaign.startTime.getTime() + index * campaign.delayBetweenEmails,
+      campaign.startTime.getTime() +
+        index * campaign.delayBetweenEmails,
     ),
     idempotencyKey: randomUUID(),
   }));
 
-  await createManyEmails(emails);
+ const createdEmails = [];
 
-  const createdEmails = await findEmailsByCampaignId(campaign.id);
+for (const email of emails) {
+  const createdEmail = await createEmail(email);
 
-  for (const email of createdEmails) {
-    await queueEmail(email.id, email.scheduledAt);
-  }
+  createdEmails.push(createdEmail);
 
-  return createdEmails;
+  await queueEmail(
+    createdEmail.id,
+    createdEmail.scheduledAt,
+  );
 }
 
-export async function getCampaignEmails(userId: string, campaignId: string) {
+return createdEmails;
+
+
+}
+
+export async function getCampaignEmails(
+  userId: string,
+  campaignId: string,
+) {
   const campaign = await findCampaignById(campaignId);
 
   if (!campaign || campaign.userId !== userId) {
