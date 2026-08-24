@@ -30,3 +30,14 @@ export async function findEmailsByCampaignId(campaignId: string) {
     },
   });
 }
+
+export async function countPendingEmails(campaignId: string) {
+  return prisma.email.count({
+    where: {
+      campaignId,
+      status: {
+        in: ["scheduled", "processing"],
+      },
+    },
+  });
+}

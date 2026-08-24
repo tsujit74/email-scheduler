@@ -1,4 +1,5 @@
 import {
+    cancelCampaign,
   createCampaign,
   findCampaignById,
   findCampaignsByUserId,
@@ -57,4 +58,25 @@ export async function getCampaignForUser(
   }
 
   return campaign;
+}
+
+export async function cancelCampaignForUser(
+  userId: string,
+  campaignId: string,
+) {
+  const campaign = await findCampaignById(campaignId);
+
+  if (!campaign || campaign.userId !== userId) {
+    throw new Error("Campaign not found");
+  }
+
+  if (campaign.status === "completed") {
+    throw new Error("Completed campaign cannot be cancelled");
+  }
+
+  if (campaign.status === "cancelled") {
+    throw new Error("Campaign is already cancelled");
+  }
+
+  return cancelCampaign(campaignId);
 }

@@ -32,3 +32,22 @@ export async function findCampaignsByUserId(userId: string) {
     },
   });
 }
+
+export async function updateCampaignStatus(
+  id: string,
+  status: "scheduled" | "processing" | "completed" | "cancelled",
+) {
+  return prisma.campaign.update({
+    where: { id },
+    data: { status },
+  });
+}
+
+export async function cancelCampaign(id: string) {
+  return prisma.campaign.update({
+    where: { id },
+    data: {
+      status: "cancelled",
+    },
+  });
+}

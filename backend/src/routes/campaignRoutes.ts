@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    cancelCampaignController,
   createCampaign,
   getCampaign,
   getCampaigns,
@@ -13,5 +14,10 @@ router.use(requireAuth);
 router.post("/", createCampaign);
 router.get("/", getCampaigns);
 router.get("/:id", getCampaign);
+router.post(
+  "/:id/cancel",
+  requireAuth,
+  cancelCampaignController,
+);
 
 export default router;

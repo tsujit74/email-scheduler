@@ -4,6 +4,9 @@ import { env } from "../config/env";
 import { prisma } from "../config/prisma";
 import { sendEmail } from "./emailSender";
 
+import { updateCampaignStatus } from "../repositories/campaignRepository";
+import { countPendingEmails } from "../repositories/emailRepository";
+
 const workerConnection = new IORedis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
@@ -23,8 +26,23 @@ export const emailWorker = new Worker(
       throw new Error(`Email ${emailId} not found`);
     }
 
-    // Prevent sending the same email again.
     if (email.status === "sent") {
+      return;
+    }
+
+    const campaign = await prisma.campaign.findUnique({
+      where: {
+        id: email.campaignId,
+      },
+    });
+
+    if (!campaign) {
+      throw new Error(`Campaign ${email.campaignId} not found`);
+    }
+
+    if (campaign.status === "cancelled") {
+      console.log(`Skipping email ${email.id}: campaign cancelled`);
+
       return;
     }
 
@@ -61,15 +79,21 @@ export const emailWorker = new Worker(
 
       console.log(`Email sent: ${email.recipient}`);
 
+      const pendingEmails = await countPendingEmails(email.campaignId);
+
+      if (pendingEmails === 0) {
+        await updateCampaignStatus(email.campaignId, "completed");
+      } else {
+        await updateCampaignStatus(email.campaignId, "processing");
+      }
+
       return {
         success: true,
         messageId: result.messageId,
       };
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Unknown email error";
+        error instanceof Error ? error.message : "Unknown email error";
 
       await prisma.email.update({
         where: {
@@ -100,8 +124,5 @@ emailWorker.on("completed", (job) => {
 });
 
 emailWorker.on("failed", (job, error) => {
-  console.error(
-    `Job ${job?.id ?? "unknown"} failed:`,
-    error.message,
-  );
+  console.error(`Job ${job?.id ?? "unknown"} failed:`, error.message);
 });

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {
+    cancelCampaignForUser,
   createCampaignForUser,
   getCampaignForUser,
   getCampaignsForUser,
@@ -79,7 +80,36 @@ export async function getCampaign(
       req.user.id,
       String(req.params.id),
     );
-    
+
+    return res.json({
+      success: true,
+      campaign,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function cancelCampaignController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
+    const campaignId = String(req.params.id);
+
+    const campaign = await cancelCampaignForUser(
+      req.user.id,
+      campaignId,
+    );
+
     return res.json({
       success: true,
       campaign,
