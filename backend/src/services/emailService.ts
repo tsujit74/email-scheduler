@@ -4,6 +4,7 @@ import {
   createManyEmails,
   findEmailsByCampaignId,
 } from "../repositories/emailRepository";
+import { queueEmail } from "./emailQueueService";
 
 type CreateEmailsInput = {
   recipients: string[];
@@ -43,7 +44,13 @@ export async function addEmailsToCampaign(
 
   await createManyEmails(emails);
 
-  return findEmailsByCampaignId(campaign.id);
+  const createdEmails = await findEmailsByCampaignId(campaign.id);
+
+  for (const email of createdEmails) {
+    await queueEmail(email.id, email.scheduledAt);
+  }
+
+  return createdEmails;
 }
 
 export async function getCampaignEmails(userId: string, campaignId: string) {
