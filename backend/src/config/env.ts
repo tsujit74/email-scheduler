@@ -17,6 +17,18 @@ const envSchema = z.object({
   DEFAULT_EMAIL_DELAY_MS: z.coerce.number().int().nonnegative().default(2000),
 
   MAX_EMAILS_PER_HOUR: z.coerce.number().int().positive().default(200),
+
+  GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
+
+  GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
+
+  GOOGLE_CALLBACK_URL: z.url("GOOGLE_CALLBACK_URL must be a valid URL"),
+
+  SESSION_SECRET: z
+    .string()
+    .min(32, "SESSION_SECRET must be at least 32 characters"),
+
+    
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
