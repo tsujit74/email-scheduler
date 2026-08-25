@@ -1,8 +1,8 @@
 export type EmailStatus =
-   "scheduled"
-   "processing"
-   "sent"
-   "failed";
+  | "scheduled"
+  | "processing"
+  | "sent"
+  | "failed";
 
 export interface Email {
   id: string;
@@ -19,4 +19,18 @@ export interface Email {
   errorMessage?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface EmailDetail extends Email {
+  campaign: {
+    id: string;
+    subject: string;
+    body: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+    };
+  };
 }

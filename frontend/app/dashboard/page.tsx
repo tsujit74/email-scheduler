@@ -143,8 +143,8 @@ export default function DashboardPage() {
 
   // Email click
   const handleEmailClick = (email: DashboardEmail) => {
-    console.log("Selected email:", email);
-  };
+  router.push(`/dashboard/emails/${email.id}`);
+};
 
   return (
     <main className="min-h-screen bg-white">

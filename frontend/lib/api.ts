@@ -3,7 +3,7 @@ import type {
   Campaign,
   CreateCampaignInput,
 } from "@/types/campaign";
-import type { Email } from "@/types/email";
+import type { Email, EmailDetail } from "@/types/email";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -111,4 +111,21 @@ export function cancelCampaign(campaignId: string) {
   }>(`/api/campaigns/${campaignId}/cancel`, {
     method: "POST",
   });
+}
+
+// export function getEmail(
+//   campaignId: string,
+//   emailId: string,
+// ) {
+//   return apiFetch<{
+//     success: boolean;
+//     email: Email;
+//   }>(`/api/${campaignId}/emails/${emailId}`);
+// }
+
+export function getEmail(emailId: string) {
+  return apiFetch<{
+    success: boolean;
+    email: EmailDetail;
+  }>(`/api/emails/${emailId}`);
 }

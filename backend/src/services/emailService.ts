@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { findCampaignById } from "../repositories/campaignRepository";
 import {
   createEmail,
+  findEmailById,
   findEmailsByCampaignId,
 } from "../repositories/emailRepository";
 import { queueEmail } from "./emailQueueService";
@@ -68,4 +69,14 @@ export async function getCampaignEmails(userId: string, campaignId: string) {
   }
 
   return findEmailsByCampaignId(campaignId);
+}
+
+export async function getEmailById(userId: string, emailId: string) {
+  const email = await findEmailById(emailId);
+
+  if (!email || email.campaign.userId !== userId) {
+    throw new AppError("Email not found", 404);
+  }
+
+  return email;
 }

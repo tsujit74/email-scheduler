@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   addEmailsToCampaign,
   getCampaignEmails,
+  getEmailById,
 } from "../services/emailService";
 
 export async function createCampaignEmails(
@@ -28,11 +29,9 @@ export async function createCampaignEmails(
       });
     }
 
-    const emails = await addEmailsToCampaign(
-      req.user.id,
-      campaignId,
-      { recipients },
-    );
+    const emails = await addEmailsToCampaign(req.user.id, campaignId, {
+      recipients,
+    });
 
     return res.status(201).json({
       success: true,
@@ -58,14 +57,38 @@ export async function getEmails(
 
     const campaignId = String(req.params.campaignId);
 
-    const emails = await getCampaignEmails(
-      req.user.id,
-      campaignId,
-    );
+    const emails = await getCampaignEmails(req.user.id, campaignId);
 
     return res.json({
       success: true,
       emails,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
+    const campaignId = String(req.params.campaignId);
+    const emailId = String(req.params.emailId);
+
+    const email = await getEmailById(req.user.id, emailId);
+
+    return res.json({
+      success: true,
+      email,
     });
   } catch (error) {
     next(error);

@@ -41,3 +41,18 @@ export async function countPendingEmails(campaignId: string) {
     },
   });
 }
+
+export async function findEmailById(emailId: string) {
+  return prisma.email.findUnique({
+    where: {
+      id: emailId,
+    },
+    include: {
+      campaign: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+}
