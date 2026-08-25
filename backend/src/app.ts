@@ -2,17 +2,17 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-
 import passport from "./config/passport";
 import { redisClient } from "./config/redis";
 import { env } from "./config/env";
 import authRoutes from "./routes/authRoutes";
-import { errorHandler } from "./middleware/errorHandler";
-import { notFound } from "./middleware/notFound";
 import campaignRoutes from "./routes/campaignRoutes";
 import emailRoutes from "./routes/emailRoutes";
+import { errorHandler } from "./middleware/errorHandler";
+import { notFound } from "./middleware/notFound";
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -31,10 +31,11 @@ app.use(
     secret: env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+
     cookie: {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   }),
@@ -49,6 +50,7 @@ app.get("/api/health", (_req, res) => {
     message: "Email Scheduler API is running",
   });
 });
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/campaigns", campaignRoutes);
