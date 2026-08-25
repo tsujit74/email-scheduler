@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport";
+import { env } from "../config/env";
 
 const router = Router();
 
@@ -24,14 +25,13 @@ router.get("/me", (req, res) => {
   });
 });
 
-
 router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/api/auth/login-failed",
   }),
   (_req, res) => {
-    res.redirect("http://localhost:3000/dashboard");
+    res.redirect(`${env.FRONTEND_URL}/dashboard`);
   },
 );
 
