@@ -7,53 +7,68 @@ import {
   Trash2,
 } from "lucide-react";
 
-type Props = {
+type EmailActionsProps = {
   onStar?: () => void;
   onArchive?: () => void;
   onDelete?: () => void;
+  onMore?: () => void;
 };
+
+type ActionButtonProps = {
+  label: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+  destructive?: boolean;
+};
+
+function ActionButton({
+  label,
+  onClick,
+  children,
+  destructive = false,
+}: ActionButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={[
+        "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+        "focus:outline-none focus:ring-4",
+        destructive
+          ? "text-gray-400 hover:bg-red-50 hover:text-red-600 focus:ring-red-100"
+          : "text-gray-400 hover:bg-gray-100 hover:text-gray-800 focus:ring-gray-100",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function EmailActions({
   onStar,
   onArchive,
   onDelete,
-}: Props) {
+  onMore,
+}: EmailActionsProps) {
   return (
     <div className="flex items-center gap-1">
-      <button
-        type="button"
-        onClick={onStar}
-        aria-label="Star email"
-        className="rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-      >
-        <Star className="h-4 w-4" />
-      </button>
+      <ActionButton label="Star email" onClick={onStar}>
+        <Star size={17} strokeWidth={1.8} />
+      </ActionButton>
 
-      <button
-        type="button"
-        onClick={onArchive}
-        aria-label="Archive email"
-        className="rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-      >
-        <Archive className="h-4 w-4" />
-      </button>
+      <ActionButton label="Archive email" onClick={onArchive}>
+        <Archive size={17} strokeWidth={1.8} />
+      </ActionButton>
 
-      <button
-        type="button"
-        onClick={onDelete}
-        aria-label="Delete email"
-        className="rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      <ActionButton label="Delete email" onClick={onDelete} destructive>
+        <Trash2 size={17} strokeWidth={1.8} />
+      </ActionButton>
 
-      <button
-        type="button"
-        aria-label="More actions"
-        className="rounded-md p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-      >
-        <MoreHorizontal className="h-4 w-4" />
-      </button>
+      <ActionButton label="More actions" onClick={onMore}>
+        <MoreHorizontal size={18} strokeWidth={1.8} />
+      </ActionButton>
     </div>
   );
 }

@@ -1,24 +1,14 @@
-type Props = {
+type EmailBodyProps = {
   body: string;
 };
 
-export default function EmailBody({ body }: Props) {
+export default function EmailBody({ body }: EmailBodyProps) {
   return (
-    <article className="border-t border-gray-100 px-5 py-7 sm:px-7 sm:py-8">
+    <article className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
       <div className="max-w-3xl">
-        <div
-          className="
-            whitespace-pre-wrap
-            break-words
-            text-[15px]
-            leading-7
-            text-gray-800
-            sm:text-[16px]
-            sm:leading-8
-          "
-        >
-          {body}
-        </div>
+        <p className="whitespace-pre-wrap break-words text-[15px] leading-8 text-gray-700 sm:text-base">
+          {body || "This email has no content."}
+        </p>
       </div>
     </article>
   );
