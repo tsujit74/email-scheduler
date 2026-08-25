@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {
-    cancelCampaignForUser,
+  cancelCampaignForUser,
   createCampaignForUser,
   getCampaignForUser,
   getCampaignsForUser,
@@ -19,16 +19,24 @@ export async function createCampaign(
       });
     }
 
-    const { subject, body, startTime, delayBetweenEmails, hourlyLimit } =
-      req.body;
-
-    const campaign = await createCampaignForUser(req.user.id, {
+    const {
       subject,
       body,
-      startTime: new Date(startTime),
+      startTime,
       delayBetweenEmails,
       hourlyLimit,
-    });
+    } = req.body;
+
+    const campaign = await createCampaignForUser(
+      req.user.id,
+      {
+        subject,
+        body,
+        startTime: new Date(startTime),
+        delayBetweenEmails,
+        hourlyLimit,
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -52,7 +60,9 @@ export async function getCampaigns(
       });
     }
 
-    const campaigns = await getCampaignsForUser(req.user.id);
+    const campaigns = await getCampaignsForUser(
+      req.user.id,
+    );
 
     return res.json({
       success: true,

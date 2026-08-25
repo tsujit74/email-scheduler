@@ -6,27 +6,36 @@ type CreateCampaignData = {
   body: string;
   startTime: Date;
   delayBetweenEmails: number;
-  hourlyLimit: number;
 };
 
-export async function createCampaign(data: CreateCampaignData) {
+export async function createCampaign(
+  data: CreateCampaignData,
+) {
   return prisma.campaign.create({
     data,
   });
 }
 
-export async function findCampaignById(id: string) {
+export async function findCampaignById(
+  id: string,
+) {
   return prisma.campaign.findUnique({
-    where: { id },
+    where: {
+      id,
+    },
     include: {
       emails: true,
     },
   });
 }
 
-export async function findCampaignsByUserId(userId: string) {
+export async function findCampaignsByUserId(
+  userId: string,
+) {
   return prisma.campaign.findMany({
-    where: { userId },
+    where: {
+      userId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -35,17 +44,29 @@ export async function findCampaignsByUserId(userId: string) {
 
 export async function updateCampaignStatus(
   id: string,
-  status: "scheduled" | "processing" | "completed" | "cancelled",
+  status:
+    | "scheduled"
+    | "processing"
+    | "completed"
+    | "cancelled",
 ) {
   return prisma.campaign.update({
-    where: { id },
-    data: { status },
+    where: {
+      id,
+    },
+    data: {
+      status,
+    },
   });
 }
 
-export async function cancelCampaign(id: string) {
+export async function cancelCampaign(
+  id: string,
+) {
   return prisma.campaign.update({
-    where: { id },
+    where: {
+      id,
+    },
     data: {
       status: "cancelled",
     },

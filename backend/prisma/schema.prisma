@@ -22,13 +22,14 @@ enum EmailStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  googleId  String   @unique
-  name      String
-  email     String   @unique
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  googleId         String   @unique
+  name             String
+  email            String   @unique
+  avatarUrl        String?
+  hourlyEmailLimit Int      @default(200)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   campaigns Campaign[]
 
@@ -42,7 +43,6 @@ model Campaign {
   body               String
   startTime          DateTime
   delayBetweenEmails Int
-  hourlyLimit        Int
   status             CampaignStatus @default(scheduled)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -59,9 +59,9 @@ model Email {
   id                String      @id @default(uuid())
   campaignId        String
   recipient         String
-  subject           String
+  subject            String
   body              String
-  scheduledAt       DateTime
+  scheduledAt        DateTime
   sentAt            DateTime?
   status            EmailStatus @default(scheduled)
   attempts          Int         @default(0)

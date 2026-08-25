@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+
 import {
   addEmailsToCampaign,
   getCampaignEmails,
@@ -81,7 +82,6 @@ export async function getEmail(
       });
     }
 
-    const campaignId = String(req.params.campaignId);
     const emailId = String(req.params.emailId);
 
     const email = await getEmailById(req.user.id, emailId);

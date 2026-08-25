@@ -9,29 +9,39 @@ type CreateEmailData = {
   idempotencyKey: string;
 };
 
-export async function createEmail(data: CreateEmailData) {
+export async function createEmail(
+  data: CreateEmailData,
+) {
   return prisma.email.create({
     data,
   });
 }
 
-export async function createManyEmails(data: CreateEmailData[]) {
+export async function createManyEmails(
+  data: CreateEmailData[],
+) {
   return prisma.email.createMany({
     data,
     skipDuplicates: true,
   });
 }
 
-export async function findEmailsByCampaignId(campaignId: string) {
+export async function findEmailsByCampaignId(
+  campaignId: string,
+) {
   return prisma.email.findMany({
-    where: { campaignId },
+    where: {
+      campaignId,
+    },
     orderBy: {
       scheduledAt: "asc",
     },
   });
 }
 
-export async function countPendingEmails(campaignId: string) {
+export async function countPendingEmails(
+  campaignId: string,
+) {
   return prisma.email.count({
     where: {
       campaignId,
@@ -42,7 +52,9 @@ export async function countPendingEmails(campaignId: string) {
   });
 }
 
-export async function findEmailById(emailId: string) {
+export async function findEmailById(
+  emailId: string,
+) {
   return prisma.email.findUnique({
     where: {
       id: emailId,
