@@ -92,7 +92,7 @@ export default function DashboardPage() {
       return email.status === "scheduled";
     }
 
-    return email.status === "sent";
+    return email.status === "sent" || email.status === "failed";
   });
 
   // Search
@@ -115,7 +115,9 @@ export default function DashboardPage() {
     (email) => email.status === "scheduled",
   ).length;
 
-  const sentCount = emails.filter((email) => email.status === "sent").length;
+  const sentCount = emails.filter(
+    (email) => email.status === "sent" || email.status === "failed",
+  ).length;
 
   const handleRefresh = async () => {
     await loadEmails();
