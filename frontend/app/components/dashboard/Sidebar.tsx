@@ -29,12 +29,10 @@ export default function Sidebar({
 
   return (
     <aside className="w-[260px] shrink-0 border-r border-gray-200 px-6 py-7">
-      {/* Logo */}
       <h1 className="text-2xl font-bold tracking-tight text-gray-900">
         OUTBOX
       </h1>
 
-      {/* User */}
       <div className="mt-10 flex items-center gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-sm font-semibold text-gray-700">
           {user?.avatarUrl ? (

@@ -14,6 +14,7 @@ import {
   getCampaigns,
   getCurrentUser,
 } from "@/lib/api";
+import {useRouter} from "next/navigation";
 
 export default function DashboardPage() {
   const [activeView, setActiveView] = useState<"scheduled" | "sent">(
@@ -27,6 +28,8 @@ export default function DashboardPage() {
 
   const [emails, setEmails] = useState<DashboardEmail[]>([]);
   const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
 
   // Load authenticated user
   const loadUser = useCallback(async () => {
@@ -135,7 +138,7 @@ export default function DashboardPage() {
 
   // Compose
   const handleCompose = () => {
-    console.log("Compose clicked");
+    router.push("/compose");
   };
 
   // Email click
