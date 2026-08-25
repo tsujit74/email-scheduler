@@ -4,17 +4,19 @@ export function calculateScheduledAt(
   delayBetweenEmails: number,
   hourlyLimit: number,
 ): Date {
-  const emailsPerHour = Math.max(1, hourlyLimit);
+  const HOUR_IN_MS = 60 * 60 * 1000;
 
-  const hourIndex = Math.floor(index / emailsPerHour);
-  const indexWithinHour = index % emailsPerHour;
+  const delayInMs = Math.max(0, delayBetweenEmails) * 1000;
 
-  const hourStart = new Date(
-    startTime.getTime() + hourIndex * 60 * 60 * 1000,
+  const hourlyLimitInterval =
+    HOUR_IN_MS / Math.max(1, hourlyLimit);
+
+  const effectiveInterval = Math.max(
+    delayInMs,
+    hourlyLimitInterval,
   );
 
   return new Date(
-    hourStart.getTime() +
-      indexWithinHour * delayBetweenEmails,
+    startTime.getTime() + index * effectiveInterval,
   );
 }
