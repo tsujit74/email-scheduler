@@ -7,3 +7,14 @@ dist/
 coverage/
 *.log
 .DS_Store
+
+
+node_modules
+# Keep environment variables out of version control
+.env
+
+/src/generated/prisma
+
+backend/src/checkQueue.ts
+backend/src/clearRateLimit.ts
+backend/src/testRateLimit.ts

@@ -3,3 +3,7 @@ node_modules
 .env
 
 /src/generated/prisma
+
+backend/src/checkQueue.ts
+backend/src/clearRateLimit.ts
+backend/src/testRateLimit.ts
