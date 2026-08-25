@@ -12,6 +12,8 @@ const envSchema = z.object({
 
   REDIS_URL: z.string().min(1, "REDIS_URL is required"),
 
+  FRONTEND_URL: z.url("FRONTEND_URL must be a valid URL"),
+
   WORKER_CONCURRENCY: z.coerce.number().int().positive().default(5),
 
   DEFAULT_EMAIL_DELAY_MS: z.coerce.number().int().nonnegative().default(2000),

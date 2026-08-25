@@ -8,8 +8,8 @@ async function startServer() {
 
     console.log("Redis connected");
 
-    app.listen(env.PORT, () => {
-      console.log(`Backend running on http://localhost:${env.PORT}`);
+    app.listen(env.PORT, "0.0.0.0", () => {
+      console.log(`Backend running on port ${env.PORT}`);
     });
   } catch (error) {
     console.error("Failed to start backend:", error);
