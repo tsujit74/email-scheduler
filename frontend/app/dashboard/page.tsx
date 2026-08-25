@@ -38,6 +38,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Failed to load current user:", error);
       setUser(null);
+      router.replace("/login");
     } finally {
       setUserLoading(false);
     }
