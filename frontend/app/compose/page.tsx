@@ -1,24 +1,28 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ComposeHeader from "../components/compose/ComposeHeader";
 import RecipientInput from "../components/compose/RecipientInput";
 import SendLaterPopover from "../components/compose/SendLaterPopover";
-import { addRecipients, createCampaign, getCurrentUser } from "@/lib/api";
+import {
+  addRecipients,
+  createCampaign,
+  getCurrentUser,
+} from "@/lib/api";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ComposePage() {
   const router = useRouter();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [recipients, setRecipients] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
 
-  const [delayBetweenEmails, setDelayBetweenEmails] = useState("0");
+  const [delayBetweenEmails, setDelayBetweenEmails] =
+    useState("0");
+
   const [hourlyLimit, setHourlyLimit] = useState("100");
 
   const [startDate, setStartDate] = useState("");
@@ -32,10 +36,13 @@ export default function ComposePage() {
   const [userEmail, setUserEmail] = useState("");
   const [fileName, setFileName] = useState("");
 
+ 
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await getCurrentUser();
+
         setUserEmail(response.user.email);
       } catch {
         router.replace("/login");
@@ -47,6 +54,8 @@ export default function ComposePage() {
     checkAuth();
   }, [router]);
 
+
+
   useEffect(() => {
     if (!error) return;
 
@@ -57,22 +66,21 @@ export default function ComposePage() {
     return () => clearTimeout(timer);
   }, [error]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  
 
-    if (!file) return;
-
+  const handleFileSelect = (file: File) => {
     setError("");
 
     const isCsv =
-      file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
+      file.type === "text/csv" ||
+      file.name.toLowerCase().endsWith(".csv");
 
     const isText =
-      file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt");
+      file.type === "text/plain" ||
+      file.name.toLowerCase().endsWith(".txt");
 
     if (!isCsv && !isText) {
       setError("Please upload a CSV or TXT file.");
-      event.target.value = "";
       return;
     }
 
@@ -82,21 +90,26 @@ export default function ComposePage() {
       const content = String(reader.result ?? "");
 
       const emails = content
-        .split(/[\s,;,\n\r]+/)
+        .split(/[\s,;\n\r]+/)
         .map((value) => value.trim().toLowerCase())
         .filter((value) => EMAIL_REGEX.test(value));
 
       const uniqueEmails = [...new Set(emails)];
 
       if (!uniqueEmails.length) {
-        setError("No valid email addresses were found in the file.");
+        setError(
+          "No valid email addresses were found in the file.",
+        );
+
         setFileName("");
         return;
       }
 
       setRecipients((current) => [
         ...current,
-        ...uniqueEmails.filter((email) => !current.includes(email)),
+        ...uniqueEmails.filter(
+          (email) => !current.includes(email),
+        ),
       ]);
 
       setFileName(file.name);
@@ -107,12 +120,12 @@ export default function ComposePage() {
     };
 
     reader.readAsText(file);
-
-    event.target.value = "";
   };
+
 
   const handleSubmit = async (event?: FormEvent) => {
     event?.preventDefault();
+
     setError("");
 
     if (!recipients.length) {
@@ -131,47 +144,70 @@ export default function ComposePage() {
     }
 
     if (!startDate || !startTime) {
-      setError("Please select a date and time before scheduling.");
+      setError(
+        "Please select a date and time before scheduling.",
+      );
+
       setShowSendLater(true);
+
       return;
     }
 
     const delay = Number(delayBetweenEmails);
     const limit = Number(hourlyLimit);
 
-    const startDateTime = new Date(`${startDate}T${startTime}`);
+    const startDateTime = new Date(
+      `${startDate}T${startTime}`,
+    );
+
+
 
     if (!Number.isFinite(delay) || delay < 0) {
-      setError("Delay between emails must be 0 seconds or greater.");
+      setError(
+        "Delay between emails must be 0 seconds or greater.",
+      );
+
       return;
     }
 
     if (!Number.isInteger(delay)) {
-      setError("Delay between emails must be a whole number.");
+      setError(
+        "Delay between emails must be a whole number.",
+      );
+
       return;
     }
 
+
     if (!Number.isFinite(limit) || limit <= 0) {
       setError("Hourly limit must be greater than 0.");
+
       return;
     }
 
     if (!Number.isInteger(limit)) {
       setError("Hourly limit must be a whole number.");
+
       return;
     }
 
+  
     if (Number.isNaN(startDateTime.getTime())) {
       setError("Please enter a valid scheduling date and time.");
+
       setShowSendLater(true);
+
       return;
     }
 
     if (startDateTime.getTime() <= Date.now()) {
       setError("Scheduled time must be in the future.");
+
       setShowSendLater(true);
+
       return;
     }
+
 
     try {
       setSubmitting(true);
@@ -184,15 +220,23 @@ export default function ComposePage() {
         hourlyLimit: limit,
       });
 
-      await addRecipients(campaignResponse.campaign.id, recipients);
+      
+      await addRecipients(
+        campaignResponse.campaign.id,
+        recipients,
+      );
 
+    
       router.push("/dashboard");
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.toLowerCase().includes("not authenticated")
+        error.message
+          .toLowerCase()
+          .includes("not authenticated")
       ) {
         router.replace("/login");
+
         return;
       }
 
@@ -206,40 +250,41 @@ export default function ComposePage() {
     }
   };
 
+
   const handleCancel = () => {
     router.push("/dashboard");
   };
 
+
+
   const handleScheduleClick = () => {
     setError("");
+
     setShowSendLater((visible) => !visible);
   };
+
+
 
   if (checkingAuth) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-white">
-        <p className="text-sm text-gray-400">Loading...</p>
+        <p className="text-sm text-gray-400">
+          Loading...
+        </p>
       </main>
     );
   }
 
+
   return (
     <main className="min-h-screen bg-white">
+     
       <div className="relative">
         <ComposeHeader
           onBack={handleCancel}
           onSchedule={handleScheduleClick}
-          onAttachment={() => fileInputRef.current?.click()}
           onSend={() => handleSubmit()}
           submitting={submitting}
-        />
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.txt,text/csv,text/plain"
-          onChange={handleFileSelect}
-          className="hidden"
         />
 
         <div className="pointer-events-none absolute right-5 top-[60px] z-50 sm:right-8 lg:right-10">
@@ -250,7 +295,9 @@ export default function ComposePage() {
                 startTime={startTime}
                 onDateChange={setStartDate}
                 onTimeChange={setStartTime}
-                onCancel={() => setShowSendLater(false)}
+                onCancel={() =>
+                  setShowSendLater(false)
+                }
                 onDone={() => {
                   setShowSendLater(false);
                   setError("");
@@ -266,25 +313,34 @@ export default function ComposePage() {
         className="mx-auto w-full max-w-5xl px-5 py-6 sm:px-8 lg:px-10"
       >
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+         
           <div className="divide-y divide-gray-100">
+     
             <div className="grid gap-2 px-5 py-4 sm:grid-cols-[90px_1fr] sm:items-center">
-              <span className="text-sm font-medium text-gray-500">From</span>
+              <span className="text-sm font-medium text-gray-500">
+                From
+              </span>
 
               <div className="w-fit max-w-full truncate rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
                 {userEmail}
               </div>
             </div>
 
+        
             <div className="grid gap-2 px-3 py-2 sm:grid-cols-[90px_1fr] sm:items-start">
-              <span className="pt-2 text-sm font-medium text-gray-500">To</span>
+              <span className="pt-2 text-sm font-medium text-gray-500">
+                To
+              </span>
 
               <RecipientInput
                 recipients={recipients}
                 onChange={setRecipients}
+                onFileSelect={handleFileSelect}
                 disabled={submitting}
               />
             </div>
 
+            
             <div className="grid gap-2 px-5 py-4 sm:grid-cols-[90px_1fr] sm:items-center">
               <label
                 htmlFor="subject"
@@ -298,15 +354,19 @@ export default function ComposePage() {
                 type="text"
                 value={subject}
                 disabled={submitting}
-                onChange={(event) => setSubject(event.target.value)}
+                onChange={(event) =>
+                  setSubject(event.target.value)
+                }
                 placeholder="Add a subject"
                 className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           </div>
 
+       
           <div className="border-t border-gray-100 bg-gray-50/60 px-4 py-3 sm:px-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        
               <label className="flex min-h-11 items-center justify-between rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-600">
                 <span>Delay between emails</span>
 
@@ -318,12 +378,16 @@ export default function ComposePage() {
                     value={delayBetweenEmails}
                     disabled={submitting}
                     onChange={(event) =>
-                      setDelayBetweenEmails(event.target.value)
+                      setDelayBetweenEmails(
+                        event.target.value,
+                      )
                     }
                     className="h-8 w-16 rounded-md border border-gray-200 px-2 text-center text-sm text-gray-800 outline-none transition focus:border-[#00b341] focus:ring-2 focus:ring-[#00b341]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
                   />
 
-                  <span className="text-xs text-gray-400">sec</span>
+                  <span className="text-xs text-gray-400">
+                    sec
+                  </span>
                 </span>
               </label>
 
@@ -337,18 +401,26 @@ export default function ComposePage() {
                     step="1"
                     value={hourlyLimit}
                     disabled={submitting}
-                    onChange={(event) => setHourlyLimit(event.target.value)}
+                    onChange={(event) =>
+                      setHourlyLimit(
+                        event.target.value,
+                      )
+                    }
                     className="h-8 w-16 rounded-md border border-gray-200 px-2 text-center text-sm text-gray-800 outline-none transition focus:border-[#00b341] focus:ring-2 focus:ring-[#00b341]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
                   />
 
-                  <span className="text-xs text-gray-400">per hour</span>
+                  <span className="text-xs text-gray-400">
+                    per hour
+                  </span>
                 </span>
               </label>
             </div>
 
             {fileName && (
               <div className="mt-2 flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-500">
-                <span className="truncate">{fileName}</span>
+                <span className="truncate">
+                  {fileName}
+                </span>
 
                 <span className="ml-3 shrink-0 font-medium text-[#00b341]">
                   {recipients.length} recipients
@@ -358,7 +430,10 @@ export default function ComposePage() {
           </div>
 
           <div className="p-4 sm:p-5">
-            <label htmlFor="body" className="sr-only">
+            <label
+              htmlFor="body"
+              className="sr-only"
+            >
               Email body
             </label>
 
@@ -366,7 +441,9 @@ export default function ComposePage() {
               id="body"
               value={body}
               disabled={submitting}
-              onChange={(event) => setBody(event.target.value)}
+              onChange={(event) =>
+                setBody(event.target.value)
+              }
               placeholder="Write your email..."
               className="min-h-[360px] w-full resize-y rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm leading-7 text-gray-800 outline-none transition focus:border-[#00b341] focus:bg-white focus:ring-4 focus:ring-[#00b341]/10 placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
             />
@@ -377,7 +454,7 @@ export default function ComposePage() {
           <div
             role="alert"
             aria-live="polite"
-            className="fixed left-1/2 top-10 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-lg"
+            className="fixed left-1/2 top-20 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-lg"
           >
             <span
               aria-hidden="true"
@@ -386,7 +463,9 @@ export default function ComposePage() {
               !
             </span>
 
-            <p className="flex-1">{error}</p>
+            <p className="flex-1">
+              {error}
+            </p>
 
             <button
               type="button"
