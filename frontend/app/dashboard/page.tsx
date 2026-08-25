@@ -9,12 +9,8 @@ import EmailList, {
 } from "../components/dashboard/EmailList";
 
 import type { User } from "@/types/auth";
-import {
-  getCampaignEmails,
-  getCampaigns,
-  getCurrentUser,
-} from "@/lib/api";
-import {useRouter} from "next/navigation";
+import { getCampaignEmails, getCampaigns, getCurrentUser } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [activeView, setActiveView] = useState<"scheduled" | "sent">(
@@ -29,7 +25,7 @@ export default function DashboardPage() {
   const [emails, setEmails] = useState<DashboardEmail[]>([]);
   const [loading, setLoading] = useState(true);
 
-    const router = useRouter();
+  const router = useRouter();
 
   // Load authenticated user
   const loadUser = useCallback(async () => {
@@ -60,28 +56,20 @@ export default function DashboardPage() {
         ),
       );
 
-      const allEmails = emailResponses.flatMap(
-        (response) => response.emails,
-      );
+      const allEmails = emailResponses.flatMap((response) => response.emails);
 
       // Convert backend Email type to DashboardEmail
-      const dashboardEmails: DashboardEmail[] = allEmails.map(
-        (email) => ({
-          id: email.id,
-          recipient: email.recipient,
-          subject: email.subject,
-          body: email.body,
-          scheduledAt: email.scheduledAt,
-          sentAt: email.sentAt ?? null,
-          status: email.status as
-            | "scheduled"
-            | "processing"
-            | "sent"
-            | "failed",
-          attempts: email.attempts ?? 0,
-          errorMessage: email.errorMessage ?? null,
-        }),
-      );
+      const dashboardEmails: DashboardEmail[] = allEmails.map((email) => ({
+        id: email.id,
+        recipient: email.recipient,
+        subject: email.subject,
+        body: email.body,
+        scheduledAt: email.scheduledAt,
+        sentAt: email.sentAt ?? null,
+        status: email.status as "scheduled" | "processing" | "sent" | "failed",
+        attempts: email.attempts ?? 0,
+        errorMessage: email.errorMessage ?? null,
+      }));
 
       setEmails(dashboardEmails);
     } catch (error) {
@@ -127,24 +115,19 @@ export default function DashboardPage() {
     (email) => email.status === "scheduled",
   ).length;
 
-  const sentCount = emails.filter(
-    (email) => email.status === "sent",
-  ).length;
+  const sentCount = emails.filter((email) => email.status === "sent").length;
 
-  // Refresh
   const handleRefresh = async () => {
     await loadEmails();
   };
 
-  // Compose
   const handleCompose = () => {
     router.push("/compose");
   };
 
-  // Email click
   const handleEmailClick = (email: DashboardEmail) => {
-  router.push(`/dashboard/emails/${email.id}`);
-};
+    router.push(`/dashboard/emails/${email.id}`);
+  };
 
   return (
     <main className="min-h-screen bg-white">
@@ -158,7 +141,7 @@ export default function DashboardPage() {
           onCompose={handleCompose}
         />
 
-        <section className="min-w-0 flex-1 px-8 py-7">
+        <section className="ml-70 min-w-0 flex-1 px-7 py-3">
           <DashboardHeader
             activeView={activeView}
             search={search}
