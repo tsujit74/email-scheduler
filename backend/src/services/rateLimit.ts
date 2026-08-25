@@ -57,13 +57,15 @@ export async function consumeEmailSlot(
     (hourWindow + 1) * 3_600_000,
   );
 
+  const retryAfterSeconds = Math.max(
+    1,
+    Math.ceil(
+      (nextHour.getTime() - now.getTime()) / 1000,
+    ),
+  );
+
   return {
     allowed: false,
-    retryAfterSeconds: Math.max(
-      1,
-      Math.ceil(
-        (nextHour.getTime() - now.getTime()) / 1000,
-      ),
-    ),
+    retryAfterSeconds,
   };
 }

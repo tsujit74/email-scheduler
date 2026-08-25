@@ -97,9 +97,7 @@ export async function addEmailsToCampaign(
   return createdEmails;
 }
 
-// --------------------------------------------------
-// GET CAMPAIGN EMAILS
-// --------------------------------------------------
+
 
 export async function getCampaignEmails(
   userId: string,
@@ -123,9 +121,6 @@ export async function getCampaignEmails(
   );
 }
 
-// --------------------------------------------------
-// GET EMAIL
-// --------------------------------------------------
 
 export async function getEmailById(
   userId: string,

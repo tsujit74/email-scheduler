@@ -20,9 +20,7 @@ export async function createCampaignForUser(
   userId: string,
   input: CreateCampaignInput,
 ) {
-  // --------------------------------------------------
-  // VALIDATION
-  // --------------------------------------------------
+
 
   if (input.delayBetweenEmails < 0) {
     throw new AppError(
@@ -59,9 +57,7 @@ export async function createCampaignForUser(
     );
   }
 
-  // --------------------------------------------------
-  // VERIFY USER
-  // --------------------------------------------------
+ 
 
   const user = await prisma.user.findUnique({
     where: {
@@ -76,22 +72,7 @@ export async function createCampaignForUser(
     );
   }
 
-  // --------------------------------------------------
-  // UPDATE USER HOURLY LIMIT
-  // --------------------------------------------------
-  //
-  // hourlyLimit belongs to the USER/TENANT.
-  //
-  // This means:
-  //
-  // User A
-  // ├── Campaign 1
-  // ├── Campaign 2
-  // └── Campaign 3
-  //
-  // All campaigns share the same hourly limit.
-  //
-  // --------------------------------------------------
+  
 
   await prisma.user.update({
     where: {
@@ -102,9 +83,6 @@ export async function createCampaignForUser(
     },
   });
 
-  // --------------------------------------------------
-  // CREATE CAMPAIGN
-  // --------------------------------------------------
 
   return createCampaign({
     userId,

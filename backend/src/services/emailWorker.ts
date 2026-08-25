@@ -30,9 +30,6 @@ export const emailWorker = new Worker(
 
     // Idempotency protection
     if (email.status === "sent") {
-      console.log(
-        `Skipping already sent email ${email.id}`,
-      );
       return;
     }
 
@@ -53,15 +50,8 @@ export const emailWorker = new Worker(
 
     // Do not send cancelled campaigns
     if (campaign.status === "cancelled") {
-      console.log(
-        `Skipping email ${email.id}: campaign cancelled`,
-      );
       return;
     }
-
-    // --------------------------------------------------
-    // USER / TENANT HOURLY RATE LIMIT
-    // --------------------------------------------------
 
     const rateLimit = await consumeEmailSlot(
       campaign.user.id,
@@ -69,26 +59,29 @@ export const emailWorker = new Worker(
     );
 
     if (!rateLimit.allowed) {
-      console.log(
-        `Hourly limit reached for user ${campaign.user.id}. ` +
-          `Email ${email.id} will be retried in ` +
-          `${rateLimit.retryAfterSeconds}s.`,
+      const delayMs =
+        rateLimit.retryAfterSeconds * 1000;
+
+      const nextAvailableTime =
+        Date.now() + delayMs;
+
+      await prisma.email.update({
+        where: {
+          id: email.id,
+        },
+        data: {
+          scheduledAt: new Date(nextAvailableTime),
+          status: "scheduled",
+        },
+      });
+
+      await job.moveToDelayed(
+        nextAvailableTime,
+        job.token,
       );
 
-      /*
-       * Throwing here means the email is NOT marked as
-       * processing and SMTP is NOT called.
-       *
-       * We use BullMQ retry/backoff to retry the job.
-       */
-      throw new Error(
-        `EMAIL_RATE_LIMIT:${rateLimit.retryAfterSeconds}`,
-      );
+      return;
     }
-
-    // --------------------------------------------------
-    // MARK EMAIL AS PROCESSING
-    // --------------------------------------------------
 
     await prisma.email.update({
       where: {
@@ -103,19 +96,11 @@ export const emailWorker = new Worker(
     });
 
     try {
-      // ------------------------------------------------
-      // SEND EMAIL
-      // ------------------------------------------------
-
       const result = await sendEmail(
         email.recipient,
         email.subject,
         email.body,
       );
-
-      // ------------------------------------------------
-      // MARK EMAIL AS SENT
-      // ------------------------------------------------
 
       await prisma.email.update({
         where: {
@@ -129,30 +114,15 @@ export const emailWorker = new Worker(
         },
       });
 
-      console.log(
-        `Email sent: ${email.recipient}`,
-      );
-
-      // ------------------------------------------------
-      // UPDATE CAMPAIGN STATUS
-      // ------------------------------------------------
-
       const pendingEmails =
-        await countPendingEmails(
-          email.campaignId,
-        );
+        await countPendingEmails(email.campaignId);
 
-      if (pendingEmails === 0) {
-        await updateCampaignStatus(
-          email.campaignId,
-          "completed",
-        );
-      } else {
-        await updateCampaignStatus(
-          email.campaignId,
-          "processing",
-        );
-      }
+      await updateCampaignStatus(
+        email.campaignId,
+        pendingEmails === 0
+          ? "completed"
+          : "processing",
+      );
 
       return {
         success: true,
@@ -183,29 +153,16 @@ export const emailWorker = new Worker(
         },
       });
 
-      console.error(
-        `Failed to send email to ${email.recipient} ` +
-          `(attempt ${currentAttempt}/${maxAttempts}): ` +
-          errorMessage,
-      );
-
       if (isFinalAttempt) {
         const pendingEmails =
-          await countPendingEmails(
-            email.campaignId,
-          );
+          await countPendingEmails(email.campaignId);
 
-        if (pendingEmails === 0) {
-          await updateCampaignStatus(
-            email.campaignId,
-            "completed",
-          );
-        } else {
-          await updateCampaignStatus(
-            email.campaignId,
-            "processing",
-          );
-        }
+        await updateCampaignStatus(
+          email.campaignId,
+          pendingEmails === 0
+            ? "completed"
+            : "processing",
+        );
       }
 
       throw error;
@@ -213,21 +170,21 @@ export const emailWorker = new Worker(
   },
   {
     connection: workerConnection,
-
-    // Configurable concurrency
     concurrency: env.WORKER_CONCURRENCY,
   },
 );
 
-emailWorker.on("completed", (job) => {
-  console.log(
-    `Job ${job.id} completed`,
-  );
+emailWorker.on("completed", () => {
+  // Job completed successfully.
 });
 
 emailWorker.on("failed", (job, error) => {
   console.error(
-    `Job ${job?.id ?? "unknown"} failed:`,
+    `[WORKER] Job ${job?.id ?? "unknown"} failed:`,
     error.message,
   );
+});
+
+emailWorker.on("error", (error) => {
+  console.error("[WORKER] Worker error:", error);
 });
