@@ -1,15 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import {
-  CalendarClock,
-  FileCheck2,
-  LogOut,
-  MailPlus,
-} from "lucide-react";
+import { CalendarClock, FileCheck2, LogOut, MailPlus } from "lucide-react";
 
 import type { User } from "@/types/auth";
 import { logout } from "@/lib/api";
+import { getInitials } from "@/lib/utils";
 
 type SidebarProps = {
   user: User | null;
@@ -41,15 +37,6 @@ export default function Sidebar({
   sentCount,
   onCompose,
 }: SidebarProps) {
-  const initials =
-    user?.name
-      ?.split(/\s+/)
-      .filter(Boolean)
-      .map((name) => name[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "U";
-
   const counts = {
     scheduled: scheduledCount,
     sent: sentCount,
@@ -74,15 +61,12 @@ export default function Sidebar({
         px-4 py-5
       "
     >
-     
       <div className="px-2">
         <p className="text-lg font-bold tracking-[0.18em] text-gray-900">
           OUTBOX
         </p>
 
-        <p className="mt-0.5 text-[11px] text-gray-400">
-          Email workspace
-        </p>
+        <p className="mt-0.5 text-[11px] text-gray-400">Email workspace</p>
       </div>
 
       <div className="mt-6 flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
@@ -96,7 +80,7 @@ export default function Sidebar({
               className="h-full w-full object-cover"
             />
           ) : (
-            initials
+            getInitials(user?.name)
           )}
         </div>
 
@@ -124,19 +108,11 @@ export default function Sidebar({
           focus:ring-4 focus:ring-[#00b341]/15
         "
       >
-        <MailPlus
-          size={16}
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-
+        <MailPlus size={16} strokeWidth={2} aria-hidden="true" />
         Compose email
       </button>
 
-      <nav
-        aria-label="Email navigation"
-        className="mt-6 space-y-1"
-      >
+      <nav aria-label="Email navigation" className="mt-6 space-y-1">
         {navigationItems.map(({ view, label, icon: Icon }) => {
           const isActive = activeView === view;
 
@@ -159,9 +135,7 @@ export default function Sidebar({
                 aria-hidden="true"
               />
 
-              <span className="truncate">
-                {label}
-              </span>
+              <span className="truncate">{label}</span>
 
               <span
                 className={[
@@ -190,11 +164,7 @@ export default function Sidebar({
             hover:bg-red-50 hover:text-red-600
           "
         >
-          <LogOut
-            size={16}
-            strokeWidth={1.8}
-            aria-hidden="true"
-          />
+          <LogOut size={16} strokeWidth={1.8} aria-hidden="true" />
 
           <span>Logout</span>
         </button>

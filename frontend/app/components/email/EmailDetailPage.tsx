@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getEmail } from "@/lib/api";
+import { getCurrentUser, getEmail } from "@/lib/api";
+import type { User } from "@/types/auth";
 import type { EmailDetail } from "@/types/email";
 
 import EmailHeader from "./EmailHeader";
@@ -14,14 +15,11 @@ type Props = {
   emailId: string;
 };
 
-export default function EmailDetailPage({
-  emailId,
-}: Props) {
+export default function EmailDetailPage({ emailId }: Props) {
   const router = useRouter();
 
-  const [email, setEmail] = useState<EmailDetail | null>(
-    null,
-  );
+  const [email, setEmail] = useState<EmailDetail | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,10 +32,14 @@ export default function EmailDetailPage({
         setLoading(true);
         setError("");
 
-        const response = await getEmail(emailId);
+        const [emailResponse, userResponse] = await Promise.all([
+          getEmail(emailId),
+          getCurrentUser(),
+        ]);
 
         if (!cancelled) {
-          setEmail(response.email);
+          setEmail(emailResponse.email);
+          setUser(userResponse.user);
         }
       } catch (error) {
         if (!cancelled) {
@@ -63,7 +65,7 @@ export default function EmailDetailPage({
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
+      <main className="ml-70 flex min-h-screen items-center justify-center bg-white">
         <p className="text-sm text-gray-500">
           Loading email...
         </p>
@@ -73,7 +75,7 @@ export default function EmailDetailPage({
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
+      <main className="ml-70 flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
           <p className="text-sm font-medium text-red-600">
             Failed to load email
@@ -100,11 +102,14 @@ export default function EmailDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="ml-70 min-h-screen bg-white">
       <EmailHeader subject={email.subject} />
 
       <div className="mx-auto max-w-5xl">
-        <EmailMetadata email={email} />
+        <EmailMetadata
+          email={email}
+          user={user}
+        />
 
         <div className="border-t border-gray-100" />
 

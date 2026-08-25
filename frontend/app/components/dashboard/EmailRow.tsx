@@ -1,5 +1,6 @@
 "use client";
 
+import { getInitials } from "@/lib/utils";
 import {
   AlertCircle,
   ArrowRight,
@@ -85,10 +86,6 @@ function formatEmailDate(value?: string | Date | null) {
   };
 }
 
-function getInitials(email: string) {
-  return email.trim().charAt(0).toUpperCase() || "?";
-}
-
 export default function EmailRow({
   recipient,
   subject,
@@ -111,7 +108,7 @@ export default function EmailRow({
       className="group flex w-full items-center gap-3 border-b border-gray-100 px-5 py-3 text-left transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-[#00b341]/20 sm:px-6"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#00b341]/10 text-xs font-semibold text-[#00b341]">
-        {getInitials(recipient)}
+        {getInitials(recipient, "?")}
       </div>
 
       <div className="min-w-0 flex-1">
