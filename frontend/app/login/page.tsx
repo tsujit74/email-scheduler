@@ -2,7 +2,14 @@
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiUrl) {
+      console.error("NEXT_PUBLIC_API_URL is not configured");
+      return;
+    }
+
+    window.location.href = `${apiUrl}/api/auth/google`;
   };
 
   return (
