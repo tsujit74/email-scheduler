@@ -1,5 +1,3 @@
-````md
----
 # OUTBOX — Full-Stack Email Job Scheduler
 
 A production-oriented email scheduling application built for the **ReachInbox / Outbox Labs Software Development Intern Assignment**.
@@ -73,7 +71,7 @@ The application uses **Next.js, Express.js, PostgreSQL, Prisma, Redis, BullMQ, N
 
 ---
 
-# Architecture
+## Architecture
 
 ```text
                          ┌────────────────────┐
@@ -87,28 +85,28 @@ The application uses **Next.js, Express.js, PostgreSQL, Prisma, Redis, BullMQ, N
                          ┌────────────────────┐
                          │   Express.js API   │
                          │      Backend       │
-                         └───────┬─────┬──────┘
-                                 │     │
-                    ┌────────────┘     └─────────────┐
-                    ▼                                ▼
-           ┌─────────────────┐              ┌─────────────────┐
-           │   PostgreSQL    │              │      Redis      │
-           │     Prisma      │              │     BullMQ      │
-           └─────────────────┘              └────────┬────────┘
-                                                      │
-                                                      │ Jobs
-                                                      ▼
-                                             ┌─────────────────┐
-                                             │  Email Worker   │
-                                             │     BullMQ      │
-                                             └────────┬────────┘
-                                                      │
-                                                      ▼
-                                             ┌─────────────────┐
-                                             │  Ethereal SMTP  │
-                                             └─────────────────┘
-````
-
+                         └─────────┬──────────┘
+                                   │
+                    ┌──────────────┴──────────────┐
+                    │                             │
+                    ▼                             ▼
+           ┌─────────────────┐          ┌─────────────────┐
+           │   PostgreSQL    │          │      Redis      │
+           │     Prisma      │          │     BullMQ      │
+           └─────────────────┘          └────────┬────────┘
+                                                 │
+                                                 │ Jobs
+                                                 ▼
+                                        ┌─────────────────┐
+                                        │  Email Worker   │
+                                        │     BullMQ      │
+                                        └────────┬────────┘
+                                                 │
+                                                 ▼
+                                        ┌─────────────────┐
+                                        │  Ethereal SMTP  │
+                                        └─────────────────┘
+```
 ---
 
 # Tech Stack
