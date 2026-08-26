@@ -1,4 +1,5 @@
 ````md
+---
 # OUTBOX — Full-Stack Email Job Scheduler
 
 A production-oriented email scheduling application built for the **ReachInbox / Outbox Labs Software Development Intern Assignment**.
@@ -848,12 +849,9 @@ The recommended demonstration sequence is:
 
 ---
 
-# Project Links
+## Project Links
 
-**GitHub:** `tsujit74/email-scheduler`
-
-**Frontend:** `https://email-scheduler-seven-beta.vercel.app`
-
-**Backend API:** `https://email-scheduler-lpr1.onrender.com`
-
-**Author:** Sujit Thakur
+- **GitHub:** [tsujit74/email-scheduler](https://github.com/tsujit74/email-scheduler)
+- **Frontend:** [Live Application](https://email-scheduler-seven-beta.vercel.app)
+- **Backend API:** [Backend API](https://email-scheduler-lpr1.onrender.com)
+- **Author:** Sujit Thakur
